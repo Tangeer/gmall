@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/gmall-export-sale/gmall-export-sale.iml" filepath="$PROJECT_DIR$/gmall-export-sale/gmall-export-sale.iml" />
       <module fileurl="file://$PROJECT_DIR$/dw-chart/src/main/main.iml" filepath="$PROJECT_DIR$/dw-chart/src/main/main.iml" />
       <module fileurl="file://$PROJECT_DIR$/dw-chart/src/test/test.iml" filepath="$PROJECT_DIR$/dw-chart/src/test/test.iml" />
     </modules>
