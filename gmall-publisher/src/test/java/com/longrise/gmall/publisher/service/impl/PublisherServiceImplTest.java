@@ -27,4 +27,16 @@ public class PublisherServiceImplTest {
         System.out.println(dateHourMap.toString());
     }
 
+    @Test
+    public void getOrderAmount(){
+        Double orderAmount = publisherService.getOrderAmount("2020-06-05");
+        System.out.println(orderAmount);
+    }
+
+    @Test
+    public void getOrderAmountHourMap(){
+        Map orderAmountHourMap = publisherService.getOrderAmountHourMap("2020-06-05");
+        System.out.println(orderAmountHourMap.toString());
+    }
+
 }

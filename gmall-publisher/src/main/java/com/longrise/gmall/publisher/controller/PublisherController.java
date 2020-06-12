@@ -20,11 +20,10 @@ public class PublisherController {
 
     @GetMapping("realtime-total")
     public String getTotal(@RequestParam("date") String date){
-        List<Map> totalList = new ArrayList<>();
-        HashMap dauMap = new HashMap<>();
+        List<Map> totalList = new ArrayList();
+        HashMap dauMap = new HashMap();
         dauMap.put("id", "dau");
         dauMap.put("name", "新增日活");
-
         Integer dauTotal = publisherService.getDauTotal(date);
         dauMap.put("value", dauTotal);
         totalList.add(dauMap);
@@ -32,9 +31,15 @@ public class PublisherController {
         Map midMap = new HashMap();
         midMap.put("id", "mid");
         midMap.put("name", "新增设备");
-
         midMap.put("value", 233);
         totalList.add(midMap);
+
+        Map orderAmountMap = new HashMap();
+        orderAmountMap.put("id", "orderAmount");
+        orderAmountMap.put("name", "新增交易额");
+        Double orderAmount = publisherService.getOrderAmount(date);
+        orderAmountMap.put("value", orderAmount);
+        totalList.add(orderAmountMap);
 
         return JSON.toJSONString(totalList);
 
@@ -43,6 +48,7 @@ public class PublisherController {
 
     @GetMapping("realtime-hour")
     public String getHourTotal(@RequestParam("id") String id, @RequestParam("date") String today){
+        HashMap hourMap = new HashMap();
         if ("dau".equals(id)){
             //今天
             Map dateHourTMap = publisherService.getDateHourMap(today);
@@ -50,12 +56,19 @@ public class PublisherController {
             String yesterday = getYesterday(today);
             Map dateHourYMap = publisherService.getDateHourMap(yesterday);
 
-            HashMap hourMap = new HashMap();
             hourMap.put("today", dateHourTMap);
             hourMap.put("yesterday", dateHourYMap);
-            return JSON.toJSONString(hourMap);
+        }else if ("orderAmount".equals(id)){
+            //今天
+            Map orderAmountHourTMap = publisherService.getOrderAmountHourMap(today);
+            // 求昨天分时明细
+            String yesterday = getYesterday(today);
+            Map orderAmountHourYMap = publisherService.getOrderAmountHourMap(yesterday);
+
+            hourMap.put("today", orderAmountHourTMap);
+            hourMap.put("yesterday", orderAmountHourYMap);
         }
-        return null;
+        return JSON.toJSONString(hourMap);
     }
 
     private String getYesterday(String today) {

@@ -12,6 +12,7 @@
         <module name="gmall-realtime" />
         <module name="gmall-publisher" />
         <module name="gmall-logger" />
+        <module name="gmall-canal" />
       </profile>
     </annotationProcessing>
   </component>
