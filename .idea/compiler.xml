@@ -13,6 +13,7 @@
         <module name="gmall-publisher" />
         <module name="gmall-logger" />
         <module name="gmall-canal" />
+        <module name="gmall-export-sale" />
       </profile>
     </annotationProcessing>
   </component>

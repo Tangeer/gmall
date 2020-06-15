@@ -7,6 +7,7 @@ import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
 import io.searchbox.core.search.aggregation.TermsAggregation;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,6 +205,100 @@ public class PublisherServiceImpl implements PublisherService {
             e.printStackTrace();
         }
         return dauHourMap;
+    }
+
+    /**
+     *  GET gmall_sale_detail/_search
+     *  {
+     *    "query": {
+     *      "bool": {
+     *        "filter": {
+     *          "term": {
+     *            "dt": "2020-06-13"
+     *          }
+     *        },
+     *        "must": [
+     *          {"match": {
+     *            "sku_name": {
+     *              "query": "手机",
+     *              "operator": "and"
+     *            }
+     *          }}
+     *        ]
+     *      }
+     *
+     *    },
+     *    "aggs": {
+     *      "groupby_user_gender": {
+     *        "terms": {
+     *          "field": "user_gender",
+     *          "size": 2
+     *        }
+     *      }
+     *    },
+     *    "from": 0,
+     *    "size": 2
+     *  }
+     * @param date
+     * @param keyword
+     * @param startPage
+     * @param size
+     * @param aggs
+     * @return
+     */
+    @Override
+    public Map getSaleDetail(String date, String keyword, int startPage, int size, String aggs) {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+
+        //过滤
+        TermQueryBuilder termQueryBuilder = new TermQueryBuilder("dt", date);
+        boolQueryBuilder.filter(termQueryBuilder);
+        if (keyword != null && keyword.length() > 0){
+            MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("sku_name", keyword).operator(MatchQueryBuilder.Operator.AND);
+            boolQueryBuilder.must(matchQueryBuilder);
+        }
+        searchSourceBuilder.query(boolQueryBuilder);
+        // 聚合
+        if (aggs != null && aggs.length() > 0){
+            TermsBuilder aggTermsBuilder = AggregationBuilders.terms("groupby_" + aggs).field(aggs).size(100);
+            searchSourceBuilder.aggregation(aggTermsBuilder);
+        }
+        // 分页
+        int from = (startPage - 1)*size;
+        searchSourceBuilder.size(size);
+        searchSourceBuilder.from(from);
+
+        System.out.println(searchSourceBuilder.toString());
+        Search search = new Search.Builder(searchSourceBuilder.toString()).addIndex(GmallConstant.ES_INDEX_SALE_DETAIL).addType("_doc").build();
+
+        List<Map> detailList = new ArrayList<>();
+        Map<String, Long> groupMap = new HashMap<>();
+        Map saleMap = new HashMap();
+        int total = 0;
+
+        try {
+            SearchResult searchResult = jestClient.execute(search);
+            List<SearchResult.Hit<Map, Void>> hits = searchResult.getHits(Map.class);
+            total = searchResult.getTotal();
+            for (SearchResult.Hit<Map, Void> hit : hits) {
+                detailList.add(hit.source);
+            }
+            if (aggs != null && aggs.length() > 0){
+                TermsAggregation termsAggregation = searchResult.getAggregations().getTermsAggregation("groupby_" + aggs);
+                List<TermsAggregation.Entry> buckets = termsAggregation.getBuckets();
+                for (TermsAggregation.Entry bucket : buckets) {
+                    groupMap.put(bucket.getKey(), bucket.getCount());
+                }
+            }
+            saleMap.put("detail", detailList);
+            saleMap.put("group",groupMap);
+            saleMap.put("total", total);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return saleMap;
     }
 
 

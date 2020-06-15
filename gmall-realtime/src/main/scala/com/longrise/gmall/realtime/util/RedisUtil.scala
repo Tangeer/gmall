@@ -8,7 +8,7 @@ object RedisUtil {
 
   def getJedisClient: Jedis = {
     if(jedisPool==null){
-      //      println("开辟一个连接池")
+      // println("开辟一个连接池")
       val config = PropertiesUtil.load("config.properties")
       val host = config.getProperty("redis.host")
       val port = config.getProperty("redis.port")

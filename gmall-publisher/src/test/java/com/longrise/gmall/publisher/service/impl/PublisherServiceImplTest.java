@@ -39,4 +39,10 @@ public class PublisherServiceImplTest {
         System.out.println(orderAmountHourMap.toString());
     }
 
+    @Test
+    public void getSaleDetail(){
+        Map orderAmountHourMap = publisherService.getSaleDetail("2020-06-13","手机", 1, 2, "user_gender");
+        System.out.println(orderAmountHourMap.toString());
+    }
+
 }
